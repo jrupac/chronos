@@ -41,9 +41,17 @@ State:
 
 ## API
 
+### States
+```
+AddState(state: string) -> (State, error)
+EditState(state: State, opts...) -> (State, error)
+GetStates() -> ([State], error)
+DeleteState(state: State) -> error
+```
+
 ### Members
 ```
-CreateMember(name: string) -> (Member, error)
+AddMember(name: string) -> (Member, error)
 EditMember(member: Member, opts...) -> (Member, error)
 GetMembers() -> ([Member], error)
 DeleteMember(member: Member) -> error
