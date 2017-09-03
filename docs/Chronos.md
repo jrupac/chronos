@@ -31,8 +31,8 @@ Task:
    - EpicId: int64?
    - Title: string
    - Description: string
-   - Assignee: Member
-   - State: State
+   - AssigneeId: int64
+   - StateId: int64
 
 State:
    - Id: int64
@@ -41,32 +41,40 @@ State:
 
 ## API
 
+### Members
 ```
 CreateMember(name: string) -> (Member, error)
 EditMember(member: Member, opts...) -> (Member, error)
+GetMembers() -> ([Member], error)
 DeleteMember(member: Member) -> error
+```
 
+### Projects
+```
 CreateProject(name: string, description: string, members: [Member]) -> (Project, error)
 EditProject(project: Project, opts...) -> (Project, error)
+GetProjects() -> ([Project], error)
 ArchiveProject(project: Project) -> error
 DeleteProject(project: Project) -> error
+```
 
+### Epics
+```
 CreateEpic(name: string, projectId: int64) -> (Epic, error)
 EditEpic(epic: Epic, opts...) -> (Epic, error)
+GetEpicsWithProject(projectId: int64) -> ([Epic], error)
 MarkEpicActive(epic: Epic) -> (Epic, error)
 MarkEpicInactive(epic: Epic) -> (Epic, error)
 DeleteEpic(epic: Epic) -> error
+```
 
+### Tasks
+```
 CreateTask(title: string, description: string, assignee: Member?, state: State [default=UNSTARTED], projectId: int64, epicId: int64?) -> (Task, error)
 EditTask(task: Task, opts...) -> (Task, error)
-DeleteTask(task: Task) -> error
-
-GetProjects() -> ([Project], error)
-
-GetEpicsWithProject(projectId: int64) -> ([Epic], error)
-
 GetTasksWithProject(projectId: int64) -> ([Task], error)
 GetTasksWithEpic(epicId: int64) -> ([Task], error)
 GetTasksWithState(state: State) -> ([Task], error)
 GetTasksWithAssignee(member: Member) -> ([Task], error)
+DeleteTask(task: Task) -> error
 ```

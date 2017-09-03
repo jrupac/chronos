@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS member (
   -- Metadata columns
   id INTEGER PRIMARY KEY,
   -- Data columns
-  name TEXT
+  username TEXT UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS project (
@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS project (
   id INTEGER PRIMARY KEY,
   -- Data columns
   name TEXT,
-  description TEXT
+  description TEXT,
+  archived BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS member_project (
