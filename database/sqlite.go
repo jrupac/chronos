@@ -11,6 +11,7 @@ import (
 
 const (
 	dialect     = "sqlite3"
+	stateTable  = "state"
 	memberTable = "member"
 )
 
@@ -44,11 +45,83 @@ func (d *SQLiteStore) Close() error {
 }
 
 /*******************************************************************************
-	Member Operations
+ * State Operations
  ******************************************************************************/
 
-// CreateMember inserts a new Member into the corresponding table and returns an instantiated Member.
-func (d *SQLiteStore) CreateMember(username string) (ret *model.Member, err error) {
+// AddState inserts a new State into the corresponding table and returns an instantiated State.
+func (d *SQLiteStore) AddState(state string) (ret *model.State, err error) {
+	if d.db == nil {
+		return nil, errUnopened
+	}
+
+	r, err := d.db.Exec(`INSERT INTO `+stateTable+` (state) VALUES($1)`, state)
+	if err != nil {
+		return
+	}
+
+	ret = model.NewState(state)
+	ret.ID, err = r.LastInsertId()
+	return
+}
+
+// EditState updates the fields of the provided `state` with the values of `update` once persisted.
+func (d *SQLiteStore) EditState(state *model.State, update model.StateUpdate) error {
+	if d.db == nil {
+		return errUnopened
+	}
+
+	_, err := d.db.Exec(`UPDATE `+stateTable+` SET state = $1 WHERE id = $2`, update.State, state.ID)
+	if err != nil {
+		return err
+	}
+
+	state.Update(update)
+	return nil
+}
+
+// GetStates retrieves states from the corresponding table and returns instantiated States.
+func (d *SQLiteStore) GetStates() (ret []*model.State, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	rows, err := d.db.Query(`SELECT id, state FROM ` + stateTable)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		m := &model.State{}
+		if err = rows.Scan(&m.ID, &m.State); err != nil {
+			return
+		}
+		ret = append(ret, m)
+	}
+	return
+}
+
+// DeleteState deletes a given state, sets the given state to nil, and returns number of rows affected.
+func (d *SQLiteStore) DeleteState(state *model.State) (ret int64, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	r, err := d.db.Exec(`DELETE FROM `+stateTable+` WHERE id = $1`, state.ID)
+	if err != nil {
+		return ret, err
+	}
+
+	state = nil
+	return r.RowsAffected()
+}
+
+/*******************************************************************************
+ * Member Operations
+ ******************************************************************************/
+
+// AddMember inserts a new Member into the corresponding table and returns an instantiated Member.
+func (d *SQLiteStore) AddMember(username string) (ret *model.Member, err error) {
 	if d.db == nil {
 		return nil, errUnopened
 	}
@@ -58,7 +131,7 @@ func (d *SQLiteStore) CreateMember(username string) (ret *model.Member, err erro
 		return
 	}
 
-	ret = &model.Member{Username: username}
+	ret = model.NewMember(username)
 	ret.ID, err = r.LastInsertId()
 	return
 }
@@ -93,7 +166,7 @@ func (d *SQLiteStore) GetMembers() (ret []*model.Member, err error) {
 	return
 }
 
-// DeleteMember deletes a given member from the corresponding table and set the given member to nil.
+// DeleteMember deletes a given member, sets the given member to nil, and returns number of rows affected.
 func (d *SQLiteStore) DeleteMember(member *model.Member) (ret int64, err error) {
 	if d.db == nil {
 		return ret, errUnopened

@@ -23,7 +23,8 @@ func main() {
 	}
 	defer d.Close()
 
-	m, err := d.CreateMember("foobar")
+	// Member tests
+	m, err := d.AddMember("foobar")
 	if err != nil {
 		log.Fatalf("Unable to create member: %s", err)
 	}
@@ -40,5 +41,25 @@ func main() {
 		log.Fatalf("Unable to delete member: %s", err)
 	} else {
 		log.Infof("Deleted %d member(s).", i)
+	}
+
+	// State tests
+	s, err := d.AddState("UNSTARTED")
+	if err != nil {
+		log.Fatalf("Unable to create state: %s", err)
+	}
+	utils.DebugPrint("Inserted state", s)
+
+	sl, err := d.GetStates()
+	if err != nil {
+		log.Fatalf("Unable to retrieve state(s): %s", err)
+	}
+	utils.DebugPrint("Retrieved state(s)", sl)
+
+	i, err = d.DeleteState(s)
+	if err != nil {
+		log.Fatalf("Unable to delete state: %s", err)
+	} else {
+		log.Infof("Deleted %d state(s).", i)
 	}
 }
