@@ -4,8 +4,12 @@ CREATE TABLE IF NOT EXISTS state (
   -- Metadata columns
   id INTEGER PRIMARY KEY,
   -- Data columns
-  state TEXT
+  state TEXT UNIQUE
 );
+
+-- Initialize `state` table with default values.
+INSERT INTO state (state) VALUES
+  ('Backlog'), ('Unstarted'), ('In Progress'), ('Blocked'), ('Done');
 
 CREATE TABLE IF NOT EXISTS member (
   -- Metadata columns
