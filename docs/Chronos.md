@@ -62,7 +62,6 @@ DeleteMember(member: Member) -> error
 CreateProject(name: string, description: string, members: [Member]) -> (Project, error)
 EditProject(project: Project, opts...) -> (Project, error)
 GetProjects() -> ([Project], error)
-ArchiveProject(project: Project) -> error
 DeleteProject(project: Project) -> error
 ```
 

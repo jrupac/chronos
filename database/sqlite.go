@@ -4,15 +4,18 @@ import (
 	"database/sql"
 	"errors"
 	"flag"
+	log "github.com/golang/glog"
 	"github.com/jrupac/chronos/model"
 	// SQLite3 driver
 	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
-	dialect     = "sqlite3"
-	stateTable  = "state"
-	memberTable = "member"
+	dialect            = "sqlite3"
+	stateTable         = "state"
+	memberTable        = "member"
+	projectTable       = "project"
+	memberProjectTable = "member_project"
 )
 
 var (
@@ -31,7 +34,9 @@ func OpenSQLite() (*SQLiteStore, error) {
 		return nil, errors.New("path to database must be specified")
 	}
 
-	db, err := sql.Open(dialect, *dbPath)
+	// Enable foreign key support on the connection
+	uri := *dbPath + "?_foreign_keys=1"
+	db, err := sql.Open(dialect, uri)
 	if err != nil {
 		return nil, err
 	}
@@ -180,3 +185,177 @@ func (d *SQLiteStore) DeleteMember(member *model.Member) (ret int64, err error) 
 	member = nil
 	return r.RowsAffected()
 }
+
+/*******************************************************************************
+ * Project Operations
+ ******************************************************************************/
+
+// AddProject inserts a new Project into the corresponding table and returns an instantiated Project.
+func (d *SQLiteStore) AddProject(name, description string) (ret *model.Project, err error) {
+	if d.db == nil {
+		return nil, errUnopened
+	}
+
+	r, err := d.db.Exec(
+		`INSERT INTO `+projectTable+` (name, description, archived) VALUES($1, $2, $3)`,
+		name, description, false)
+	if err != nil {
+		return
+	}
+
+	ret = model.NewProject(name, description, false, []int64{})
+	ret.ID, err = r.LastInsertId()
+	return
+}
+
+// EditProject updates the fields of the provided `project` with the values of `update` once persisted.
+func (d *SQLiteStore) EditProject(project *model.Project, update model.ProjectUpdate) (err error) {
+	if d.db == nil {
+		return errUnopened
+	}
+
+	successFunc := func() {
+		project.Update(update)
+	}
+
+	workFunc := func(tx *sql.Tx) error {
+		_, err = tx.Exec(
+			`UPDATE `+projectTable+` SET name = $1, description = $2 WHERE id = $3`,
+			update.Name, update.Description, project.ID)
+		if err != nil {
+			return err
+		}
+
+		stmt, err := tx.Prepare(
+			`INSERT INTO ` + memberProjectTable + ` (member_id, project_id) VALUES($1, $2)`)
+		if err != nil {
+			return err
+		}
+
+		for _, id := range update.Members {
+			if _, err = stmt.Exec(id, project.ID); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	err = d.doTx(workFunc, successFunc, emptyFunc)
+	return
+}
+
+// GetProjects retrieves projects from the corresponding table and returns instantiated Projects.
+func (d *SQLiteStore) GetProjects() (ret []*model.Project, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	failureFunc := func() {
+		// Don't return partial results
+		ret = nil
+	}
+
+	workFunc := func(tx *sql.Tx) error {
+		// Retrieve all projects first
+		rows, err := tx.Query(`SELECT id, name, description, archived FROM ` + projectTable)
+		defer rows.Close()
+		if err != nil {
+			return err
+		}
+
+		for rows.Next() {
+			m := &model.Project{}
+			if err = rows.Scan(&m.ID, &m.Name, &m.Description, &m.Archived); err != nil {
+				return err
+			}
+			ret = append(ret, m)
+		}
+
+		// Then retrieve all members for each project
+		stmt, err := tx.Prepare(
+			`SELECT member_id FROM ` + memberProjectTable + ` WHERE project_id = $1`)
+		if err != nil {
+			return err
+		}
+
+		for _, p := range ret {
+			rows, err := stmt.Query(p.ID)
+			defer rows.Close()
+			if err != nil {
+				return err
+			}
+
+			var memberID int64
+			for rows.Next() {
+				rows.Scan(&memberID)
+				p.Members = append(p.Members, memberID)
+			}
+		}
+
+		return nil
+	}
+
+	err = d.doTx(workFunc, emptyFunc, failureFunc)
+	return
+}
+
+// DeleteProject deletes a given project, sets the given project to nil, and returns number of rows affected.
+func (d *SQLiteStore) DeleteProject(project *model.Project) (ret int64, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	// Corresponding rows of other tables are deleted by cascade
+	r, err := d.db.Exec(`DELETE FROM `+projectTable+` WHERE id = $1`, project.ID)
+	if err != nil {
+		return ret, err
+	}
+
+	project = nil
+	return r.RowsAffected()
+}
+
+// doTx wraps workFunc with transaction handling logic and calls successFunc or failureFunc depending on the outcome.
+func (d *SQLiteStore) doTx(workFunc func(*sql.Tx) error, successFunc, failureFunc func()) (err error) {
+	// Call post-transaction functions before return
+	defer func() {
+		if p := recover(); p != nil {
+			failureFunc()
+			panic(p)
+		} else if err != nil {
+			failureFunc()
+			return
+		}
+		successFunc()
+		return
+	}()
+
+	tx, err := d.db.Begin()
+	if err != nil {
+		return
+	}
+
+	// Resolve the transaction in a deferred fashion
+	defer func() {
+		// Errors thrown here are only logged to preserve the error thrown in workFunc
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			if e := tx.Rollback(); e != nil {
+				log.Warningf("failed to rollback transaction: %s", e)
+			}
+			return
+		}
+		if e := tx.Commit(); e != nil {
+			log.Warningf("failed to commit transaction: %s", e)
+		}
+		return
+	}()
+
+	err = workFunc(tx)
+	return
+}
+
+// emptyFunc is a convenience function for use with doTx.
+var emptyFunc = func() {}
