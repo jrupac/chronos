@@ -62,13 +62,6 @@ func main() {
 	}
 	utils.DebugPrint("Edited project", p)
 
-	i, err := d.DeleteProject(p)
-	if err != nil {
-		log.Fatalf("Unable to delete project: %s", err)
-	} else {
-		log.Infof("Deleted %d project(s).", i)
-	}
-
 	// State tests
 	s, err := d.AddState("NEW STATE")
 	if err != nil {
@@ -82,6 +75,46 @@ func main() {
 	}
 	utils.DebugPrint("Retrieved state(s)", sl)
 
+	// Task tests
+	t, err := d.AddTask(p.ID, m.ID, s.ID, "test task", "test description")
+	if err != nil {
+		log.Fatalf("Unable to create task: %s", err)
+	}
+	utils.DebugPrint("Inserted task", t)
+
+	tl, err := d.GetTasksWithProject(p.ID)
+	if err != nil {
+		log.Fatalf("Unable to retrieve tasks(s) with project: %s", err)
+	}
+	utils.DebugPrint("Retrieved task(s)", tl)
+
+	tl, err = d.GetTasksWithAssignee(m.ID)
+	if err != nil {
+		log.Fatalf("Unable to retrieve tasks(s) with assginee: %s", err)
+	}
+	utils.DebugPrint("Retrieved task(s)", tl)
+
+	tl, err = d.GetTasksWithState(s.ID)
+	if err != nil {
+		log.Fatalf("Unable to retrieve tasks(s) with state: %s", err)
+	}
+	utils.DebugPrint("Retrieved task(s)", tl)
+
+	// Cleanup
+	i, err := d.DeleteTask(t)
+	if err != nil {
+		log.Fatalf("Unable to delete task: %s", err)
+	} else {
+		log.Infof("Deleted %d state(s).", i)
+	}
+
+	i, err = d.DeleteProject(p)
+	if err != nil {
+		log.Fatalf("Unable to delete project: %s", err)
+	} else {
+		log.Infof("Deleted %d project(s).", i)
+	}
+
 	i, err = d.DeleteState(s)
 	if err != nil {
 		log.Fatalf("Unable to delete state: %s", err)
@@ -89,7 +122,6 @@ func main() {
 		log.Infof("Deleted %d state(s).", i)
 	}
 
-	// Cleanup
 	i, err = d.DeleteMember(m)
 	if err != nil {
 		log.Fatalf("Unable to delete member: %s", err)

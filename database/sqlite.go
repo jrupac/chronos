@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"flag"
-	log "github.com/golang/glog"
 	"github.com/jrupac/chronos/model"
 	// SQLite3 driver
 	_ "github.com/mattn/go-sqlite3"
@@ -16,6 +15,7 @@ const (
 	memberTable        = "member"
 	projectTable       = "project"
 	memberProjectTable = "member_project"
+	taskTable          = "task"
 )
 
 var (
@@ -315,47 +315,128 @@ func (d *SQLiteStore) DeleteProject(project *model.Project) (ret int64, err erro
 	return r.RowsAffected()
 }
 
-// doTx wraps workFunc with transaction handling logic and calls successFunc or failureFunc depending on the outcome.
-func (d *SQLiteStore) doTx(workFunc func(*sql.Tx) error, successFunc, failureFunc func()) (err error) {
-	// Call post-transaction functions before return
-	defer func() {
-		if p := recover(); p != nil {
-			failureFunc()
-			panic(p)
-		} else if err != nil {
-			failureFunc()
-			return
-		}
-		successFunc()
-		return
-	}()
+/*******************************************************************************
+ * Task Operations
+ ******************************************************************************/
+// TODO: Add support for epics.
 
-	tx, err := d.db.Begin()
+// AddTask inserts a new Task into the corresponding table and returns an instantiated Task.
+func (d *SQLiteStore) AddTask(projectID, assigneeID, stateID int64, title, description string) (ret *model.Task, err error) {
+	if d.db == nil {
+		return nil, errUnopened
+	}
+
+	r, err := d.db.Exec(`INSERT INTO `+taskTable+` (project_id, assignee_id, state_id, title, description) `+
+		`VALUES($1, $2, $3, $4, $5)`,
+		projectID, assigneeID, stateID, title, description)
 	if err != nil {
 		return
 	}
 
-	// Resolve the transaction in a deferred fashion
-	defer func() {
-		// Errors thrown here are only logged to preserve the error thrown in workFunc
-		if p := recover(); p != nil {
-			tx.Rollback()
-			panic(p)
-		} else if err != nil {
-			if e := tx.Rollback(); e != nil {
-				log.Warningf("failed to rollback transaction: %s", e)
-			}
-			return
-		}
-		if e := tx.Commit(); e != nil {
-			log.Warningf("failed to commit transaction: %s", e)
-		}
-		return
-	}()
-
-	err = workFunc(tx)
+	ret = model.NewTask(projectID, 0, assigneeID, stateID, title, description)
+	ret.ID, err = r.LastInsertId()
 	return
 }
 
-// emptyFunc is a convenience function for use with doTx.
-var emptyFunc = func() {}
+// EditTask updates the fields of the provided `task` with the values of `update` once persisted.
+func (d *SQLiteStore) EditTask(task *model.Task, update model.TaskUpdate) (err error) {
+	if d.db == nil {
+		return errUnopened
+	}
+
+	_, err = d.db.Exec(
+		`UPDATE `+taskTable+` SET assignee_id = $1, state_id = $2, title = $3, description = $4 WHERE id = $5`,
+		update.AssigneeID, update.StateID, update.Title, update.Description, task.ID)
+	return
+}
+
+// GetTasks retrieves tasks for the requested project and returns instantiated Tasks.
+func (d *SQLiteStore) GetTasksWithProject(projectID int64) (ret []*model.Task, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	rows, err := d.db.Query(
+		`SELECT id, project_id, assignee_id, state_id, title, description FROM `+taskTable+` WHERE project_id = $1`, projectID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		m := &model.Task{}
+		if err = rows.Scan(&m.ID, &m.ProjectID, &m.AssigneeID, &m.StateID, &m.Title, &m.Description); err != nil {
+			// Don't return partial results
+			return nil, err
+		}
+		ret = append(ret, m)
+	}
+
+	return
+}
+
+// GetTasks retrieves tasks for the requested state and returns instantiated Tasks.
+func (d *SQLiteStore) GetTasksWithState(stateID int64) (ret []*model.Task, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	rows, err := d.db.Query(
+		`SELECT id, project_id, assignee_id, state_id, title, description FROM `+taskTable+` WHERE state_id = $1`, stateID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		m := &model.Task{}
+		if err = rows.Scan(&m.ID, &m.ProjectID, &m.AssigneeID, &m.StateID, &m.Title, &m.Description); err != nil {
+			// Don't return partial results
+			return nil, err
+		}
+		ret = append(ret, m)
+	}
+
+	return
+}
+
+// GetTasks retrieves tasks for the requested assignee and returns instantiated Tasks.
+func (d *SQLiteStore) GetTasksWithAssignee(assigneeID int64) (ret []*model.Task, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	rows, err := d.db.Query(
+		`SELECT id, project_id, assignee_id, state_id, title, description FROM `+taskTable+` WHERE assignee_id = $1`, assigneeID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		m := &model.Task{}
+		if err = rows.Scan(&m.ID, &m.ProjectID, &m.AssigneeID, &m.StateID, &m.Title, &m.Description); err != nil {
+			// Don't return partial results
+			return nil, err
+		}
+		ret = append(ret, m)
+	}
+
+	return
+}
+
+// DeleteTask deletes a given task, sets the given task to nil, and returns number of rows affected.
+func (d *SQLiteStore) DeleteTask(task *model.Task) (ret int64, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	// Corresponding rows of other tables are deleted by cascade
+	r, err := d.db.Exec(`DELETE FROM `+taskTable+` WHERE id = $1`, task.ID)
+	if err != nil {
+		return ret, err
+	}
+
+	task = nil
+	return r.RowsAffected()
+}

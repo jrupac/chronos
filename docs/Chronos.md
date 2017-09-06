@@ -77,7 +77,7 @@ DeleteEpic(epic: Epic) -> error
 
 ### Tasks
 ```
-CreateTask(title: string, description: string, assignee: Member?, state: State [default=UNSTARTED], projectId: int64, epicId: int64?) -> (Task, error)
+AddTask(title: string, description: string, assignee: Member?, state: State [default=UNSTARTED], projectId: int64, epicId: int64?) -> (Task, error)
 EditTask(task: Task, opts...) -> (Task, error)
 GetTasksWithProject(projectId: int64) -> ([Task], error)
 GetTasksWithEpic(epicId: int64) -> ([Task], error)
