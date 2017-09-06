@@ -6,6 +6,8 @@
 - [Project]
     - [Epic]
        -  [Task]
+- [Board]
+    - [Project]
 
 ## TYPES
 
@@ -39,6 +41,12 @@ State:
    - State: string
         - Defaults: [ BACKLOG, UNSTARTED, IN-PROGRESS, FINISHED, ARCHIVED, ... ]
 
+Board:
+   - Id: int64
+   - Name: string
+   - Description: string
+   - Projects: [Project]
+
 ## API
 
 ### States
@@ -63,6 +71,14 @@ CreateProject(name: string, description: string, members: [Member]) -> (Project,
 EditProject(project: Project, opts...) -> (Project, error)
 GetProjects() -> ([Project], error)
 DeleteProject(project: Project) -> error
+```
+
+### Boards
+```
+CreateBoard(name: string, description: string, projects: [Project]) -> (Board, error)
+EditBoard(board: Board, opts...) -> (Board, error)
+GetBoards() -> ([Board], error)
+DeleteBoard(board: Board) -> error
 ```
 
 ### Epics

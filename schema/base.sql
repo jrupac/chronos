@@ -27,6 +27,14 @@ CREATE TABLE IF NOT EXISTS project (
   archived BOOLEAN
 );
 
+CREATE TABLE IF NOT EXISTS board (
+  -- Metadata columns
+  id INTEGER PRIMARY KEY,
+  -- Data columns
+  name TEXT,
+  description TEXT
+);
+
 CREATE TABLE IF NOT EXISTS member_project (
   -- Metadata columns
   member_id INTEGER NOT NULL,
@@ -34,6 +42,15 @@ CREATE TABLE IF NOT EXISTS member_project (
   FOREIGN KEY (member_id) REFERENCES member(id) ON DELETE CASCADE,
   FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
   PRIMARY KEY (member_id, project_id)
+);
+
+CREATE TABLE IF NOT EXISTS project_board (
+  -- Metadata columns
+  project_id INTEGER NOT NULL,
+  board_id INTEGER NOT NULL,
+  FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
+  FOREIGN KEY (board_id) REFERENCES board(id) ON DELETE CASCADE,
+  PRIMARY KEY (project_id, board_id)
 );
 
 CREATE TABLE IF NOT EXISTS epic (

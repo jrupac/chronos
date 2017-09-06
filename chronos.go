@@ -37,7 +37,8 @@ func main() {
 	}
 	utils.DebugPrint("Retrieved member(s)", ml)
 
-	p, err := d.AddProject("Test Project", "Test Project Description")
+	// Project tests
+	p, err := d.AddProject("Test Project", "Test Project Description", []int64{m.ID})
 	if err != nil {
 		log.Fatalf("Unable to create project: %s", err)
 	}
@@ -49,9 +50,9 @@ func main() {
 	}
 	utils.DebugPrint("Retrieved project(s)", pl)
 
-	// Add member to project
+	// Update name of project
 	u := model.ProjectUpdate{
-		Name:        p.Name,
+		Name:        "Test Project Update",
 		Description: p.Description,
 		Archived:    p.Archived,
 		Members:     []int64{m.ID},
@@ -61,6 +62,31 @@ func main() {
 		log.Fatalf("Unable to edit project: %s", err)
 	}
 	utils.DebugPrint("Edited project", p)
+
+	// Board tests
+	b, err := d.AddBoard("Test Board", "Test Board Description", []int64{p.ID})
+	if err != nil {
+		log.Fatalf("Unable to create board: %s", err)
+	}
+	utils.DebugPrint("Inserted board", b)
+
+	bl, err := d.GetBoards()
+	if err != nil {
+		log.Fatalf("Unable to retrieve board(s): %s", err)
+	}
+	utils.DebugPrint("Retrieved board(s)", bl)
+
+	// Update name of board
+	bu := model.BoardUpdate{
+		Name:        "Test Board Update",
+		Description: b.Description,
+		Projects:    []int64{p.ID},
+	}
+	err = d.EditBoard(b, bu)
+	if err != nil {
+		log.Fatalf("Unable to edit board: %s", err)
+	}
+	utils.DebugPrint("Edited board", b)
 
 	// State tests
 	s, err := d.AddState("NEW STATE")
@@ -113,6 +139,13 @@ func main() {
 		log.Fatalf("Unable to delete project: %s", err)
 	} else {
 		log.Infof("Deleted %d project(s).", i)
+	}
+
+	i, err = d.DeleteBoard(b)
+	if err != nil {
+		log.Fatalf("Unable to delete board: %s", err)
+	} else {
+		log.Infof("Deleted %d board(s).", i)
 	}
 
 	i, err = d.DeleteState(s)

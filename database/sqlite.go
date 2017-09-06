@@ -14,7 +14,9 @@ const (
 	stateTable         = "state"
 	memberTable        = "member"
 	projectTable       = "project"
+	boardTable         = "board"
 	memberProjectTable = "member_project"
+	projectBoardTable  = "project_board"
 	taskTable          = "task"
 )
 
@@ -191,20 +193,38 @@ func (d *SQLiteStore) DeleteMember(member *model.Member) (ret int64, err error) 
  ******************************************************************************/
 
 // AddProject inserts a new Project into the corresponding table and returns an instantiated Project.
-func (d *SQLiteStore) AddProject(name, description string) (ret *model.Project, err error) {
+func (d *SQLiteStore) AddProject(name, description string, members []int64) (ret *model.Project, err error) {
 	if d.db == nil {
 		return nil, errUnopened
 	}
 
-	r, err := d.db.Exec(
-		`INSERT INTO `+projectTable+` (name, description, archived) VALUES($1, $2, $3)`,
-		name, description, false)
-	if err != nil {
-		return
-	}
+	workFunc := func(tx *sql.Tx) error {
+		r, err := tx.Exec(
+			`INSERT INTO `+projectTable+` (name, description, archived) VALUES($1, $2, $3)`,
+			name, description, false)
+		if err != nil {
+			return err
+		}
 
-	ret = model.NewProject(name, description, false, []int64{})
-	ret.ID, err = r.LastInsertId()
+		ret = model.NewProject(name, description, false, []int64{})
+		ret.ID, err = r.LastInsertId()
+
+		stmt, err := tx.Prepare(
+			`INSERT INTO ` + memberProjectTable + ` (member_id, project_id) VALUES($1, $2)`)
+		if err != nil {
+			return err
+		}
+
+		for _, id := range members {
+			if _, err = stmt.Exec(id, ret.ID); err != nil {
+				return err
+			}
+		}
+
+		ret.Members = members
+		return nil
+	}
+	err = d.doTx(workFunc, emptyFunc, emptyFunc)
 	return
 }
 
@@ -227,7 +247,7 @@ func (d *SQLiteStore) EditProject(project *model.Project, update model.ProjectUp
 		}
 
 		stmt, err := tx.Prepare(
-			`INSERT INTO ` + memberProjectTable + ` (member_id, project_id) VALUES($1, $2)`)
+			`INSERT OR REPLACE INTO ` + memberProjectTable + ` (member_id, project_id) VALUES($1, $2)`)
 		if err != nil {
 			return err
 		}
@@ -312,6 +332,152 @@ func (d *SQLiteStore) DeleteProject(project *model.Project) (ret int64, err erro
 	}
 
 	project = nil
+	return r.RowsAffected()
+}
+
+/*******************************************************************************
+ * Board Operations
+ ******************************************************************************/
+
+// AddBoard inserts a new Board into the corresponding table and returns an instantiated Board.
+func (d *SQLiteStore) AddBoard(name, description string, projects []int64) (ret *model.Board, err error) {
+	if d.db == nil {
+		return nil, errUnopened
+	}
+
+	workFunc := func(tx *sql.Tx) error {
+		r, err := tx.Exec(`INSERT INTO `+boardTable+` (name, description) VALUES($1, $2)`, name, description)
+		if err != nil {
+			return err
+		}
+
+		ret = model.NewBoard(name, description, []int64{})
+		ret.ID, err = r.LastInsertId()
+
+		stmt, err := tx.Prepare(
+			`INSERT INTO ` + projectBoardTable + ` (project_id, board_id) VALUES($1, $2)`)
+		if err != nil {
+			return err
+		}
+
+		for _, id := range projects {
+			if _, err = stmt.Exec(id, ret.ID); err != nil {
+				return err
+			}
+		}
+
+		ret.Projects = projects
+		return nil
+	}
+
+	err = d.doTx(workFunc, emptyFunc, emptyFunc)
+	return
+}
+
+// EditBoard updates the fields of the provided `board` with the values of `update` once persisted.
+func (d *SQLiteStore) EditBoard(board *model.Board, update model.BoardUpdate) (err error) {
+	if d.db == nil {
+		return errUnopened
+	}
+
+	successFunc := func() {
+		board.Update(update)
+	}
+
+	workFunc := func(tx *sql.Tx) error {
+		_, err = tx.Exec(
+			`UPDATE `+boardTable+` SET name = $1, description = $2 WHERE id = $3`,
+			update.Name, update.Description, board.ID)
+		if err != nil {
+			return err
+		}
+
+		stmt, err := tx.Prepare(
+			`INSERT OR REPLACE INTO ` + projectBoardTable + ` (project_id, board_id) VALUES($1, $2)`)
+		if err != nil {
+			return err
+		}
+
+		for _, id := range update.Projects {
+			if _, err = stmt.Exec(id, board.ID); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	err = d.doTx(workFunc, successFunc, emptyFunc)
+	return
+}
+
+// GetBoards retrieves boards from the corresponding table and returns instantiated Boards.
+func (d *SQLiteStore) GetBoards() (ret []*model.Board, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	failureFunc := func() {
+		// Don't return partial results
+		ret = nil
+	}
+
+	workFunc := func(tx *sql.Tx) error {
+		// Retrieve all boards first
+		rows, err := tx.Query(`SELECT id, name, description FROM ` + boardTable)
+		defer rows.Close()
+		if err != nil {
+			return err
+		}
+
+		for rows.Next() {
+			m := &model.Board{}
+			if err = rows.Scan(&m.ID, &m.Name, &m.Description); err != nil {
+				return err
+			}
+			ret = append(ret, m)
+		}
+
+		// Then retrieve all projects for each board
+		stmt, err := tx.Prepare(
+			`SELECT project_id FROM ` + projectBoardTable + ` WHERE board_id = $1`)
+		if err != nil {
+			return err
+		}
+
+		for _, p := range ret {
+			rows, err := stmt.Query(p.ID)
+			defer rows.Close()
+			if err != nil {
+				return err
+			}
+
+			var projectID int64
+			for rows.Next() {
+				rows.Scan(&projectID)
+				p.Projects = append(p.Projects, projectID)
+			}
+		}
+
+		return nil
+	}
+
+	err = d.doTx(workFunc, emptyFunc, failureFunc)
+	return
+}
+
+// DeleteBoard deletes a given board, sets the given board to nil, and returns number of rows affected.
+func (d *SQLiteStore) DeleteBoard(board *model.Board) (ret int64, err error) {
+	if d.db == nil {
+		return ret, errUnopened
+	}
+
+	// Corresponding rows of other tables are deleted by cascade
+	r, err := d.db.Exec(`DELETE FROM `+boardTable+` WHERE id = $1`, board.ID)
+	if err != nil {
+		return ret, err
+	}
+
+	board = nil
 	return r.RowsAffected()
 }
 
