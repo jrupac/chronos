@@ -1,16 +1,23 @@
+import Card from 'antd/lib/card';
+import Layout from 'antd/lib/layout';
+import Menu from 'antd/lib/menu';
 import React, {Component} from 'react';
 import {Responsive, WidthProvider} from 'react-grid-layout';
-import Board from 'components/Board';
-import Task from 'components/Task';
 // Include RGL stylesheets
 import '../node_modules/react-grid-layout/css/styles.css';
 import '../node_modules/react-resizable/css/styles.css';
 import './Chronos.css';
 
+import Board from './components/Board';
+import Task from './components/Task';
+
+const {Header, Content} = Layout;
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 const breakpoints = {'lg': 1200};
 const cols = {'lg': 4};
+const rowHeight = 25;
+const menuItems = Array.from(['Board']);
 
 /**
  * Main class.
@@ -22,25 +29,38 @@ class Chronos extends Component {
    */
   render() {
     return (
-        <div className="App">
-          <div className="App-header">
-            Chronos
-          </div>
-          <ResponsiveReactGridLayout
-              className="layout"
-              breakpoints={breakpoints}
-              cols={cols}
-              isResizable={false}
-              rowHeight={50}>
-            {loadData()}
-          </ResponsiveReactGridLayout>
-        </div>
+        <Layout>
+          <Header style={{position: 'fixed', width: '100%'}}>
+            <div className="logo"/>
+            <Menu
+                theme="dark"
+                mode="horizontal"
+                defaultSelectedKeys={['Board']}
+                style={{lineHeight: '64px'}}>
+              {
+                menuItems.map((e) => {
+                  return <Menu.Item key={e}>{e}</Menu.Item>;
+                })
+              }
+            </Menu>
+          </Header>
+          <Content style={{padding: '0 50px', marginTop: 64}}>
+            <ResponsiveReactGridLayout
+                className="layout"
+                breakpoints={breakpoints}
+                cols={cols}
+                isResizable={false}
+                margin={[10, 10]}
+                rowHeight={rowHeight}>
+              {loadData()}
+            </ResponsiveReactGridLayout>
+          </Content>
+        </Layout>
     );
   }
 }
 
 // Sample data
-
 
 const stateToCol = new Map([[1, 0], [2, 1], [3, 2], [4, 3]]);
 
@@ -58,7 +78,7 @@ const loadStates = () => {
     headerRows.push(
         <div
             className="board-state"
-            key={'state'+e.id}
+            key={'state' + e.id}
             data-grid={
               {
                 'w': 1,
@@ -84,29 +104,31 @@ const loadTasks = () => {
     new Task(
         2, 0, 0, 0, 1, 'Prettify the frontend',
         'Add CSS and other layout to make it look good.'),
+    new Task(
+        3, 0, 0, 0, 2, 'Mock up all frontend interactions',
+        'Create mock entries for everything that needs to be fetched from ' +
+        'the server to make it easier to create the frontend.'),
   ]);
   const colYIndex = new Map();
 
   tasks.forEach((e) => {
     colYIndex.set(e.stateId, (colYIndex.get(e.stateId) || 0) + 1);
     taskRows.push(
-        <div
-            className="board-task"
-            key={'task'+e.id}
+        <Card
+            key={'task' + e.id}
             data-grid={{
               'w': 1,
-              'h': 2,
+              'h': 5,
               'i': String(e.id),
               'x': stateToCol.get(e.stateId),
               'y': colYIndex.get(e.stateId),
-            }}>
-          <div className="board-task-title">
-            {e.title}
-          </div>
+            }}
+            title={e.title}
+            bodyStyle={{padding: 0}}>
           <div className="board-task-description">
             {e.description}
           </div>
-        </div>
+        </Card>
     );
   });
 

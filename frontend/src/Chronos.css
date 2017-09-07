@@ -1,14 +1,13 @@
-.App {
-  text-align: center;
+@import '~antd/dist/antd.css';
+
+body {
+  background: #ececec;
 }
 
-.App-header {
-  background-color: #222;
-  height: 30px;
-  padding: 15px;
-  color: white;
-  font-family: 'Roboto', sans-serif;
-  font-size: large;
+.react-grid-layout {
+  margin-top: 20px;
+  background: #DDD;
+  border-bottom: 10px solid #DDD;
 }
 
 .board-state {
@@ -16,29 +15,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: large;
   border: 1px solid darkgray;
 }
 
-.board-task {
-  background: #EEE;
-  border: 1px solid darkgray;
-  box-shadow: rgba(30, 30, 30, 0.3) 0 1px 5px;
-}
-
-.board-task-title {
+.ant-card {
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  font-size: large;
-  padding-left: 10px;
-  padding-top: 10px;
+  flex-direction: column;
+  padding: 0 24px 10px 24px;
+  overflow: hidden;
+  height: 100%;
+}
+
+.ant-card-head {
+  padding: 0;
+}
+
+.ant-card-body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.ant-card:before {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  background: linear-gradient(to top, white 10px, transparent 30px);
+  left: 0;
+  top: 0;
+  content: '';
+
 }
 
 .board-task-description {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  font-size: smaller;
-  padding-left: 10px;
+  text-align: left;
+  padding-top: 10px;
+
 }
+
