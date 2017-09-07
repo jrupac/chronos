@@ -1,3 +1,6 @@
+# IDE-specific files
 *.iml
 .idea/
+
+# Test database location
 data/
