@@ -130,7 +130,14 @@ const loadTasks = () => {
           <Card
 
               title={e.title}
-              bodyStyle={{padding: 0}}>
+              bodyStyle={
+                {
+                  paddingTop: 0,
+                  paddingRight: 24,
+                  paddingBottom: 0,
+                  paddingLeft: 24,
+                }
+              }>
             <Dotdotdot className="board-task-description" clamp="auto">
               {e.description}
             </Dotdotdot>
