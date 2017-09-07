@@ -6,6 +6,7 @@
     "antd": "^2.13.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-dotdotdot": "^1.1.0",
     "react-grid-layout": "^0.15.2"
   },
   "devDependencies": {

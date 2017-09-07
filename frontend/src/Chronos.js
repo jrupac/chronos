@@ -2,6 +2,7 @@ import Card from 'antd/lib/card';
 import Layout from 'antd/lib/layout';
 import Menu from 'antd/lib/menu';
 import React, {Component} from 'react';
+import Dotdotdot from 'react-dotdotdot';
 import {Responsive, WidthProvider} from 'react-grid-layout';
 // Include RGL stylesheets
 import '../node_modules/react-grid-layout/css/styles.css';
@@ -50,7 +51,7 @@ class Chronos extends Component {
                 breakpoints={breakpoints}
                 cols={cols}
                 isResizable={false}
-                margin={[10, 10]}
+                margin={[1, 1]}
                 rowHeight={rowHeight}>
               {loadData()}
             </ResponsiveReactGridLayout>
@@ -77,7 +78,6 @@ const loadStates = () => {
   states.forEach((e) => {
     headerRows.push(
         <div
-            className="board-state"
             key={'state' + e.id}
             data-grid={
               {
@@ -87,8 +87,11 @@ const loadStates = () => {
                 'x': i++,
                 'y': 0,
                 'static': true,
-              }}>
-          {e.state}
+              }}
+            className="board-state-wrapper">
+          <div className="board-state" >
+            {e.state}
+          </div>
         </div>
     );
   });
@@ -114,7 +117,7 @@ const loadTasks = () => {
   tasks.forEach((e) => {
     colYIndex.set(e.stateId, (colYIndex.get(e.stateId) || 0) + 1);
     taskRows.push(
-        <Card
+        <div
             key={'task' + e.id}
             data-grid={{
               'w': 1,
@@ -123,12 +126,16 @@ const loadTasks = () => {
               'x': stateToCol.get(e.stateId),
               'y': colYIndex.get(e.stateId),
             }}
-            title={e.title}
-            bodyStyle={{padding: 0}}>
-          <div className="board-task-description">
-            {e.description}
-          </div>
-        </Card>
+            className="board-task-wrapper">
+          <Card
+
+              title={e.title}
+              bodyStyle={{padding: 0}}>
+            <Dotdotdot className="board-task-description" clamp="auto">
+              {e.description}
+            </Dotdotdot>
+          </Card>
+        </div>
     );
   });
 

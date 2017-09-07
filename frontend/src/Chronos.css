@@ -10,12 +10,20 @@ body {
   border-bottom: 10px solid #DDD;
 }
 
+.board-state-wrapper {
+  outline: 1px solid darkgray;
+}
+
 .board-state {
   background: #DDD;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid darkgray;
+  height: 100%;
+}
+
+.board-task-wrapper {
+  padding: 10px;
 }
 
 .ant-card {
@@ -24,6 +32,7 @@ body {
   padding: 0 24px 10px 24px;
   overflow: hidden;
   height: 100%;
+
 }
 
 .ant-card-head {
@@ -35,20 +44,9 @@ body {
   overflow: hidden;
 }
 
-.ant-card:before {
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  background: linear-gradient(to top, white 10px, transparent 30px);
-  left: 0;
-  top: 0;
-  content: '';
-
-}
-
 .board-task-description {
   text-align: left;
   padding-top: 10px;
-
+  height: 100%;
 }
 
