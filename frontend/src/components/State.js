@@ -1,7 +1,7 @@
 /**
  * Board represents a collection of tasks and projects.
  */
-export default class Board {
+export default class State {
   /**
    * Constructor.
    * @param {Number} id Unique ID of object.

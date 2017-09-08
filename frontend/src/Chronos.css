@@ -11,9 +11,18 @@ body {
   padding: 5px 20px;
 }
 
-.layout {
-  margin-top: 20px;
+.ui.menu {
+  margin-bottom: 20px;
+}
+
+.main-board {
   background: #ececec;
+}
+
+.epic-board {
+  background: #DDDDDD;
+  border-top: 1px solid darkgray;
+  border-bottom: 1px solid lightgrey;
 }
 
 .board-state-wrapper {
@@ -29,6 +38,18 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
+.board-epic-wrapper {
+}
+
+.board-epic {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 0 0 20px;
+  height: 100%;
+  font-size: larger;
+}
+
 .board-task-wrapper {
   padding: 10px;
   overflow: hidden;
@@ -41,9 +62,8 @@ body {
 .ui.fluid.card, .ui.fluid.card:hover {
   border-radius: 0;
   height: 100%;
-  border-left: 5px solid steelblue;
+  border-left: 5px solid green;
 }
-
 
 .ui.card > .content {
   overflow: hidden;
@@ -53,8 +73,11 @@ body {
   align-items: stretch;
 }
 
+.ui.card > .content > .header {
+  display: flex;
+  align-items: center;
+}
+
 .ui.card > .content > .description {
   display: flex;
 }
-
-

@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import Dotdotdot from 'react-dotdotdot';
 import {Responsive, WidthProvider} from 'react-grid-layout';
-import {Card, Menu} from 'semantic-ui-react';
+import {Card, Label, Menu} from 'semantic-ui-react';
 
-import Board from './components/Board';
+import State from './components/State';
 import Task from './components/Task';
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
@@ -32,7 +32,7 @@ class Chronos extends Component {
             ))}
           </Menu>
           <ResponsiveReactGridLayout
-              className="layout"
+              className="main-board"
               breakpoints={breakpoints}
               cols={cols}
               isResizable={false}
@@ -40,6 +40,7 @@ class Chronos extends Component {
               rowHeight={rowHeight}>
             {loadData()}
           </ResponsiveReactGridLayout>
+          <EpicBoard/>
         </div>
     );
   }
@@ -47,16 +48,98 @@ class Chronos extends Component {
 
 // Sample data
 
+class EpicBoard extends Component {
+  render() {
+    const tasks = Array.from([
+      new Task(
+          4, 0, 0, 0, 2, 'Foo bar', 'fo fo foo sjk jksf.'),
+      new Task(
+          5, 0, 0, 0, 1, 'Foo bar2', 'fo fo foo sjk jksf2.'),
+      new Task(
+          6, 0, 0, 0, 4, 'Foo bar3', 'fo fo foo sjk jksf3.'),
+    ]);
+    const colYIndex = new Map();
+
+    return (
+        <ResponsiveReactGridLayout
+            className="epic-board"
+            breakpoints={breakpoints}
+            cols={cols}
+            isResizable={false}
+            margin={[0, 0]}
+            rowHeight={rowHeight}>
+          <div
+              key={'epic2'}
+              data-grid={{
+                'w': 4,
+                'h': 1,
+                'i': String('epic2'),
+                'x': 0,
+                'y': 0,
+                'static': true,
+              }}
+              className="board-epic-wrapper">
+            <Epic/>
+          </div>
+
+          {tasks.map((e) => {
+            colYIndex.set(e.stateId, (colYIndex.get(e.stateId) || 1) + 1);
+            return <div
+                key={'task' + e.id}
+                data-grid={{
+                  'w': 1,
+                  'h': 5,
+                  'i': String(e.id),
+                  'x': stateToCol.get(e.stateId),
+                  'y': colYIndex.get(e.stateId),
+                }}
+                className="board-task-wrapper">
+              <Card fluid raised>
+                <Card.Content>
+                  <Card.Header>
+                    <Label horizontal color='brown'>
+                      {'PRJ-' + e.id}
+                    </Label>
+                    {e.title}
+                  </Card.Header>
+
+                  <Card.Description>
+
+                    <Dotdotdot clamp="auto" children={e.description}/>
+                  </Card.Description>
+                </Card.Content>
+              </Card>
+            </div>;
+          })}
+
+        </ResponsiveReactGridLayout>
+    );
+  }
+}
+
+class Epic extends Component {
+  render() {
+    return (
+        <div className="board-epic">
+          <Label horizontal color='brown'>
+            {'E-1'}
+          </Label>
+          {'Epic1'}
+        </div>
+    );
+  }
+}
+
 const stateToCol = new Map([[1, 0], [2, 1], [3, 2], [4, 3]]);
 
 const loadStates = () => {
   const headerRows = [];
   let i = 0;
   const states = Array.from([
-    new Board(1, 'Unstarted'),
-    new Board(2, 'In Progress'),
-    new Board(3, 'Blocked'),
-    new Board(4, 'Done'),
+    new State(1, 'Unstarted'),
+    new State(2, 'In Progress'),
+    new State(3, 'Blocked'),
+    new State(4, 'Done'),
   ]);
 
   states.forEach((e) => {
@@ -113,8 +196,13 @@ const loadTasks = () => {
             className="board-task-wrapper">
           <Card fluid raised>
             <Card.Content>
-              <Card.Header children={e.title}/>
-              <Card.Meta children={'Project 1'}/>
+              <Card.Header>
+                <Label horizontal color='brown'>
+                  {'PRJ-' + e.id}
+                </Label>
+                {e.title}
+              </Card.Header>
+
               <Card.Description>
                 <Dotdotdot clamp="auto" children={e.description}/>
               </Card.Description>
