@@ -1,12 +1,28 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import 'semantic-ui-css/semantic.min.css';
+import {render} from 'react-dom';
+import {Provider} from 'react-redux';
+import {createStore} from 'redux';
 import '../node_modules/react-grid-layout/css/styles.css';
 import '../node_modules/react-resizable/css/styles.css';
+import '../node_modules/semantic-ui-css/semantic.min.css';
+import {FetchStates} from './actions/state';
+import {FetchTasks} from './actions/task';
 
-import Chronos from './Chronos';
 import './Chronos.css';
+import Chronos from './containers/chronos';
+import ChronosReducer from './reducers';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<Chronos/>, document.getElementById('root'));
+let store = createStore(ChronosReducer);
+
+// Load initial data
+store.dispatch(FetchStates());
+store.dispatch(FetchTasks());
+
+render(
+    <Provider store={store}>
+      <Chronos/>
+    </Provider>,
+    document.getElementById('root'));
+
 registerServiceWorker();
