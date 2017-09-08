@@ -1,24 +1,18 @@
-import Card from 'antd/lib/card';
-import Layout from 'antd/lib/layout';
-import Menu from 'antd/lib/menu';
 import React, {Component} from 'react';
 import Dotdotdot from 'react-dotdotdot';
 import {Responsive, WidthProvider} from 'react-grid-layout';
-// Include RGL stylesheets
-import '../node_modules/react-grid-layout/css/styles.css';
-import '../node_modules/react-resizable/css/styles.css';
-import './Chronos.css';
+import {Card, Menu} from 'semantic-ui-react';
 
 import Board from './components/Board';
 import Task from './components/Task';
 
-const {Header, Content} = Layout;
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 const breakpoints = {'lg': 1200};
 const cols = {'lg': 4};
-const rowHeight = 25;
-const menuItems = Array.from(['Board']);
+const rowHeight = 30;
+const menuItems = Array.from(['Boards', 'Projects']);
+const activeItem = 'Boards';
 
 /**
  * Main class.
@@ -30,33 +24,22 @@ class Chronos extends Component {
    */
   render() {
     return (
-        <Layout>
-          <Header style={{position: 'fixed', width: '100%'}}>
-            <div className="logo"/>
-            <Menu
-                theme="dark"
-                mode="horizontal"
-                defaultSelectedKeys={['Board']}
-                style={{lineHeight: '64px'}}>
-              {
-                menuItems.map((e) => {
-                  return <Menu.Item key={e}>{e}</Menu.Item>;
-                })
-              }
-            </Menu>
-          </Header>
-          <Content style={{padding: '0 50px', marginTop: 64}}>
-            <ResponsiveReactGridLayout
-                className="layout"
-                breakpoints={breakpoints}
-                cols={cols}
-                isResizable={false}
-                margin={[1, 1]}
-                rowHeight={rowHeight}>
-              {loadData()}
-            </ResponsiveReactGridLayout>
-          </Content>
-        </Layout>
+        <div>
+          <Menu pointing color="blue" inverted size="huge">
+            {menuItems.map((e) => (
+                <Menu.Item key={e} name={e} active={activeItem === e}/>
+            ))}
+          </Menu>
+          <ResponsiveReactGridLayout
+              className="layout"
+              breakpoints={breakpoints}
+              cols={cols}
+              isResizable={false}
+              margin={[1, 1]}
+              rowHeight={rowHeight}>
+            {loadData()}
+          </ResponsiveReactGridLayout>
+        </div>
     );
   }
 }
@@ -89,7 +72,7 @@ const loadStates = () => {
                 'static': true,
               }}
             className="board-state-wrapper">
-          <div className="board-state" >
+          <div className="board-state">
             {e.state}
           </div>
         </div>
@@ -127,20 +110,14 @@ const loadTasks = () => {
               'y': colYIndex.get(e.stateId),
             }}
             className="board-task-wrapper">
-          <Card
-
-              title={e.title}
-              bodyStyle={
-                {
-                  paddingTop: 0,
-                  paddingRight: 24,
-                  paddingBottom: 0,
-                  paddingLeft: 24,
-                }
-              }>
-            <Dotdotdot className="board-task-description" clamp="auto">
-              {e.description}
-            </Dotdotdot>
+          <Card fluid raised>
+            <Card.Content>
+              <Card.Header children={e.title}/>
+              <Card.Meta children={'Project 1'}/>
+              <Card.Description>
+                <Dotdotdot clamp="auto" children={e.description}/>
+              </Card.Description>
+            </Card.Content>
           </Card>
         </div>
     );

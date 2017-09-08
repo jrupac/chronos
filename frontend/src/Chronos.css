@@ -1,13 +1,12 @@
-@import '~antd/dist/antd.css';
-
 body {
-  background: #ececec;
+  padding: 0;
+  font-family: sans-serif;
+  margin: 40px;
 }
 
-.react-grid-layout {
+.layout {
   margin-top: 20px;
-  background: #DDD;
-  border-bottom: 10px solid #DDD;
+  background: #ececec;
 }
 
 .board-state-wrapper {
@@ -20,42 +19,35 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .board-task-wrapper {
   padding: 10px;
-}
-
-.ant-card {
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
-  height: 100%;
-  border-radius: 0;
 }
 
-.ant-card-bordered {
-  border: none;
-  /* Temporary color */
-  border-left: 5px solid steelblue !important;
-}
-
-.ant-card:not(.ant-card-no-hovering):hover {
+.ui.fluid.card:hover {
   outline: 1px solid gray;
 }
 
-.ant-card-head {
-  padding: 0 24px 0 24px;
+.ui.fluid.card, .ui.fluid.card:hover {
+  border-radius: 0;
+  height: 100%;
+  border-left: 5px solid steelblue;
 }
 
-.ant-card-body {
-  height: 100%;
+
+.ui.card > .content {
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-.board-task-description {
-  text-align: left;
-  padding-top: 10px;
-  height: 100%;
+.ui.card > .content > .description {
+  display: flex;
 }
+
 
