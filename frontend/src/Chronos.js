@@ -26,6 +26,7 @@ class Chronos extends Component {
     return (
         <div>
           <Menu pointing color="blue" inverted size="huge">
+            <Menu.Item key='logo' name='Chronos' className='logo'/>
             {menuItems.map((e) => (
                 <Menu.Item key={e} name={e} active={activeItem === e}/>
             ))}
