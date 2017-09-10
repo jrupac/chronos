@@ -1,10 +1,12 @@
 import {combineReducers} from 'redux';
-import tasks from './task';
+import epics from './epic';
 import states from './state';
+import tasks from './task';
 
 const ChronosReducer = combineReducers({
-  tasks,
+  epics,
   states,
+  tasks,
 });
 
 export default ChronosReducer;

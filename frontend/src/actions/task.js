@@ -1,3 +1,5 @@
+import {EMPTY_EPIC} from './epic';
+
 export const ADD_TASKS = 'ADD_TASKS';
 
 /**
@@ -28,12 +30,13 @@ class Task {
 export const FetchTasks = () => {
   const tasks = Array.from([
     new Task(
-        1, 0, 0, 0, 2, 'Sample Chronos frontend', 'Set up sample frontend.'),
+        1, 0, EMPTY_EPIC, 0, 2, 'Sample Chronos frontend',
+        'Set up sample frontend.'),
     new Task(
-        2, 0, 0, 0, 1, 'Prettify the frontend',
+        2, 0, 1, 0, 1, 'Prettify the frontend',
         'Add CSS and other layout to make it look good.'),
     new Task(
-        3, 0, 0, 0, 2, 'Mock up all frontend interactions',
+        3, 0, EMPTY_EPIC, 0, 2, 'Mock up all frontend interactions',
         'Create mock entries for everything that needs to be fetched from ' +
         'the server to make it easier to create the frontend.'),
   ]);

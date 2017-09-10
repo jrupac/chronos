@@ -8,7 +8,7 @@ const Task = ({task}) => {
         <Card.Content>
           <Card.Header>
             <Label horizontal color='brown'>
-              {'PRJ-' + task.id}
+              {`PRJ-${task.id}`}
             </Label>
             {task.title}
           </Card.Header>

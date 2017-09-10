@@ -1,11 +1,16 @@
 import {ADD_STATES} from '../actions/state';
 
-const states = (state = {}, action) => {
+const initialState = {
+  states: new Map(),
+  lastCol: 0,
+};
+
+const states = (state = initialState, action) => {
   switch (action.type) {
   case ADD_STATES:
-    let lastCol = state.lastCol || 0;
+    let lastCol = state.lastCol;
     let newStates = [
-      ...states.states || 0,
+      ...state.states,
       ...action.states.map((e) => {
         e['col'] = lastCol++;
         return [e.id, e];

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Chronos from './Chronos';
+import Chronos from './containers/chronos';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');

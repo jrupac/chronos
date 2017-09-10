@@ -2,8 +2,10 @@ import React, {Component} from 'react';
 import {Responsive, WidthProvider} from 'react-grid-layout';
 import {connect} from 'react-redux';
 import {Menu} from 'semantic-ui-react';
-import Task from '../components/task';
+import {EMPTY_EPIC} from '../actions/epic';
+import EpicBoard from '../components/epicBoard';
 import State from '../components/state';
+import Task from '../components/task';
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
@@ -22,7 +24,10 @@ class Chronos extends Component {
    * @return {XML}
    */
   render() {
-    let {tasks, states} = this.props;
+    let {tasks, states, epics} = this.props;
+    console.log(epics);
+
+    const nonEpicTasks = tasks.filter((e) => e.epicID === EMPTY_EPIC);
 
     return (
         <div>
@@ -54,12 +59,12 @@ class Chronos extends Component {
                         'static': true,
                       }}
                     className="board-state-wrapper">
-                  <State state={e} />
+                  <State state={e}/>
                 </div>
             ))}
 
-            {/* Render tasks */}
-            {tasks.map((e) => (
+            {/* Render tasks not in epics */}
+            {nonEpicTasks.map((e) => (
                 <div
                     key={`task-${e.id}`}
                     data-grid={{
@@ -75,17 +80,30 @@ class Chronos extends Component {
             ))}
 
           </ResponsiveReactGridLayout>
+
+          {epics.map((epic) => {
+            const epicTasks = tasks.filter((e) => e.epicID === epic.id);
+            return <EpicBoard
+                key={epic.id}
+                epic={epic}
+                epicTasks={epicTasks}
+                states={states}
+            />;
+          })};
+
         </div>
     );
   }
 }
 
 const mapStateToProps = (state) => {
-  let {tasks, states} = state;
+  console.log(state);
+  let {tasks, states, epics} = state;
 
   return {
     tasks,
     'states': states.states,
+    'epics': epics.epics,
   };
 };
 
