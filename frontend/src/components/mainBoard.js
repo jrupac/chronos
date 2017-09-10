@@ -5,7 +5,10 @@ import Task from './task';
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
-const MainBoard = ({tasks, states, breakpoints, cols, rowHeight}) => {
+const MainBoard = ({tasks, states, boardProps}) => {
+  const {breakpoints, cols, rowHeight} = boardProps;
+  const {stateWidth, stateHeight, taskWidth, taskHeight} = boardProps;
+
   return (
       <ResponsiveReactGridLayout
           className="main-board"
@@ -21,8 +24,8 @@ const MainBoard = ({tasks, states, breakpoints, cols, rowHeight}) => {
                 key={`state-${e.id}`}
                 data-grid={
                   {
-                    'w': 1,
-                    'h': 1,
+                    'w': stateWidth,
+                    'h': stateHeight,
                     'i': `state-${e.id}`,
                     'x': e.col,
                     'y': 0,
@@ -38,8 +41,8 @@ const MainBoard = ({tasks, states, breakpoints, cols, rowHeight}) => {
             <div
                 key={`task-${e.id}`}
                 data-grid={{
-                  'w': 1,
-                  'h': 5,
+                  'w': taskWidth,
+                  'h': taskHeight,
                   'i': `task-${e.id}`,
                   'x': states.get(e.stateId).col,
                   'y': 0,
