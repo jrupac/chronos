@@ -1,13 +1,9 @@
 import React, {Component} from 'react';
-import {Responsive, WidthProvider} from 'react-grid-layout';
 import {connect} from 'react-redux';
 import {Menu} from 'semantic-ui-react';
 import {EMPTY_EPIC} from '../actions/epic';
 import EpicBoard from '../components/epicBoard';
-import State from '../components/state';
-import Task from '../components/task';
-
-const ResponsiveReactGridLayout = WidthProvider(Responsive);
+import MainBoard from '../components/mainBoard';
 
 const breakpoints = {'lg': 1200};
 const cols = {'lg': 4};
@@ -25,7 +21,6 @@ class Chronos extends Component {
    */
   render() {
     let {tasks, states, epics} = this.props;
-    console.log(epics);
 
     const nonEpicTasks = tasks.filter((e) => e.epicID === EMPTY_EPIC);
 
@@ -37,50 +32,17 @@ class Chronos extends Component {
                 <Menu.Item key={e} name={e} active={activeItem === e}/>
             ))}
           </Menu>
-          <ResponsiveReactGridLayout
-              className="main-board"
+
+          {/* Render main board */}
+          <MainBoard
+              tasks={nonEpicTasks}
+              states={states}
               breakpoints={breakpoints}
               cols={cols}
-              isResizable={false}
-              margin={[1, 1]}
-              rowHeight={rowHeight}>
+              rowHeight={rowHeight}
+          />
 
-            {/* Render states */}
-            {Array.from(states.values(), (e) => (
-                <div
-                    key={`state-${e.id}`}
-                    data-grid={
-                      {
-                        'w': 1,
-                        'h': 1,
-                        'i': `state-${e.id}`,
-                        'x': e.col,
-                        'y': 0,
-                        'static': true,
-                      }}
-                    className="board-state-wrapper">
-                  <State state={e}/>
-                </div>
-            ))}
-
-            {/* Render tasks not in epics */}
-            {nonEpicTasks.map((e) => (
-                <div
-                    key={`task-${e.id}`}
-                    data-grid={{
-                      'w': 1,
-                      'h': 5,
-                      'i': `task-${e.id}`,
-                      'x': states.get(e.stateId).col,
-                      'y': 0,
-                    }}
-                    className="board-task-wrapper">
-                  <Task task={e}/>
-                </div>
-            ))}
-
-          </ResponsiveReactGridLayout>
-
+          {/* Render tasks in epics as separate boards */}
           {epics.map((epic) => {
             const epicTasks = tasks.filter((e) => e.epicID === epic.id);
             return <EpicBoard
@@ -88,6 +50,9 @@ class Chronos extends Component {
                 epic={epic}
                 epicTasks={epicTasks}
                 states={states}
+                breakpoints={breakpoints}
+                cols={cols}
+                rowHeight={rowHeight}
             />;
           })};
 
@@ -97,7 +62,6 @@ class Chronos extends Component {
 }
 
 const mapStateToProps = (state) => {
-  console.log(state);
   let {tasks, states, epics} = state;
 
   return {

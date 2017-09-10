@@ -1,38 +1,40 @@
 import React from 'react';
 import {Responsive, WidthProvider} from 'react-grid-layout';
-import Epic from './epic';
+import State from './state';
 import Task from './task';
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
-
-const EpicBoard = ({epic, epicTasks, states, breakpoints, cols, rowHeight}) => {
+const MainBoard = ({tasks, states, breakpoints, cols, rowHeight}) => {
   return (
       <ResponsiveReactGridLayout
-          className="epic-board"
+          className="main-board"
           breakpoints={breakpoints}
           cols={cols}
           isResizable={false}
-          margin={[0, 0]}
+          margin={[1, 1]}
           rowHeight={rowHeight}>
 
-        {/* Render row with epic information */}
-        <div
-            key={`epic-${epic.id}`}
-            data-grid={{
-              'w': 4,
-              'h': 1,
-              'i': `epic-${epic.id}`,
-              'x': 0,
-              'y': 0,
-              'static': true,
-            }}
-            className="board-epic-wrapper">
-          <Epic epic={epic}/>
-        </div>
+        {/* Render states */}
+        {Array.from(states.values(), (e) => (
+            <div
+                key={`state-${e.id}`}
+                data-grid={
+                  {
+                    'w': 1,
+                    'h': 1,
+                    'i': `state-${e.id}`,
+                    'x': e.col,
+                    'y': 0,
+                    'static': true,
+                  }}
+                className="board-state-wrapper">
+              <State state={e}/>
+            </div>
+        ))}
 
-        {/* Render tasks in this epic */}
-        {epicTasks.map((e) => (
+        {/* Render tasks not in epics */}
+        {tasks.map((e) => (
             <div
                 key={`task-${e.id}`}
                 data-grid={{
@@ -50,4 +52,4 @@ const EpicBoard = ({epic, epicTasks, states, breakpoints, cols, rowHeight}) => {
   );
 };
 
-export default EpicBoard;
+export default MainBoard;
