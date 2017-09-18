@@ -44,7 +44,7 @@ const MainBoard = ({tasks, states, projects, boardProps}) => {
                   'w': taskWidth,
                   'h': taskHeight,
                   'i': `task-${e.id}`,
-                  'x': states.get(e.stateId).col,
+                  'x': states.get(e.stateID).col,
                   'y': 0,
                 }}
                 className="board-task-wrapper">

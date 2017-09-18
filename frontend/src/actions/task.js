@@ -9,19 +9,19 @@ class Task {
   /**
    * Task constructor.
    * @param {Number} id ID Unique ID of object.
-   * @param {Number} projectId ID of the project this task is part of.
-   * @param {Number} epicId ID of the epic this task is in, or 0 otherwise.
-   * @param {Number} assigneeId ID of assignee of this task.
-   * @param {Number} stateId ID of state of this task.
+   * @param {Number} projectID ID of the project this task is part of.
+   * @param {Number} epicID ID of the epic this task is in, or 0 otherwise.
+   * @param {Number} assigneeID ID of assignee of this task.
+   * @param {Number} stateID ID of state of this task.
    * @param {String} title Title of task.
    * @param {String} description Description of task.
    */
-  constructor(id, projectId, epicId, assigneeId, stateId, title, description) {
+  constructor(id, projectID, epicID, assigneeID, stateID, title, description) {
     this.id = id;
-    this.projectID = projectId;
-    this.epicID = epicId;
-    this.assigneeID = assigneeId;
-    this.stateId = stateId;
+    this.projectID = projectID;
+    this.epicID = epicID;
+    this.assigneeID = assigneeID;
+    this.stateID = stateID;
     this.title = title;
     this.description = description;
   }
