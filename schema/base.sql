@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS project (
   -- Data columns
   name TEXT,
   description TEXT,
-  archived BOOLEAN
+  active BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS board (

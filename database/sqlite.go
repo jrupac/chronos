@@ -200,13 +200,13 @@ func (d *SQLiteStore) AddProject(name, description string, members []int64) (ret
 
 	workFunc := func(tx *sql.Tx) error {
 		r, err := tx.Exec(
-			`INSERT INTO `+projectTable+` (name, description, archived) VALUES($1, $2, $3)`,
-			name, description, false)
+			`INSERT INTO `+projectTable+` (name, description, active) VALUES($1, $2, $3)`,
+			name, description, true)
 		if err != nil {
 			return err
 		}
 
-		ret = model.NewProject(name, description, false, []int64{})
+		ret = model.NewProject(name, description, true, []int64{})
 		ret.ID, err = r.LastInsertId()
 
 		stmt, err := tx.Prepare(
@@ -277,7 +277,7 @@ func (d *SQLiteStore) GetProjects() (ret []*model.Project, err error) {
 
 	workFunc := func(tx *sql.Tx) error {
 		// Retrieve all projects first
-		rows, err := tx.Query(`SELECT id, name, description, archived FROM ` + projectTable)
+		rows, err := tx.Query(`SELECT id, name, description, active FROM ` + projectTable)
 		defer rows.Close()
 		if err != nil {
 			return err
@@ -285,7 +285,7 @@ func (d *SQLiteStore) GetProjects() (ret []*model.Project, err error) {
 
 		for rows.Next() {
 			m := &model.Project{}
-			if err = rows.Scan(&m.ID, &m.Name, &m.Description, &m.Archived); err != nil {
+			if err = rows.Scan(&m.ID, &m.Name, &m.Description, &m.Active); err != nil {
 				return err
 			}
 			ret = append(ret, m)

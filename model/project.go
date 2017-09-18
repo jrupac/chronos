@@ -10,17 +10,17 @@ type Project struct {
 type ProjectUpdate struct {
 	Name        string
 	Description string
-	Archived    bool
+	Active      bool
 	Members     []int64
 }
 
 // NewProject returns an instantiated Project.
-func NewProject(name string, description string, archived bool, members []int64) *Project {
+func NewProject(name string, description string, active bool, members []int64) *Project {
 	return &Project{
 		ProjectUpdate: ProjectUpdate{
 			Name:        name,
 			Description: description,
-			Archived:    archived,
+			Active:      active,
 			Members:     members,
 		},
 	}
@@ -30,6 +30,6 @@ func NewProject(name string, description string, archived bool, members []int64)
 func (m *Project) Update(update ProjectUpdate) {
 	m.Name = update.Name
 	m.Description = update.Description
-	m.Archived = update.Archived
+	m.Active = update.Active
 	m.Members = update.Members
 }

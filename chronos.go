@@ -54,7 +54,7 @@ func main() {
 	u := model.ProjectUpdate{
 		Name:        "Test Project Update",
 		Description: p.Description,
-		Archived:    p.Archived,
+		Active:      p.Active,
 		Members:     []int64{m.ID},
 	}
 	err = d.EditProject(p, u)
