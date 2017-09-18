@@ -1,7 +1,7 @@
 export const ADD_EPICS = 'ADD_EPICS';
 
 /**
- * Epic represents a collection of related tasks.
+ * Epic represents a collection of related tasks within a project.
  */
 class Epic {
   /**
@@ -24,7 +24,7 @@ export const EMPTY_EPIC = 0;
 export const FetchEpics = () => {
   const epics = Array.from([
     new Epic(
-        1, 0, 'Chronos Frontend UI', true),
+        1, 1, 'Chronos Frontend UI', true),
   ]);
 
   return {
