@@ -29,8 +29,7 @@ class Chronos extends Component {
    * @return {XML}
    */
   render() {
-    let {tasks, states, epics} = this.props;
-    const nonEpicTasks = tasks.filter((e) => e.epicID === EMPTY_EPIC);
+    let {tasks, states, epics, projects} = this.props;
 
     return (
         <div>
@@ -43,22 +42,23 @@ class Chronos extends Component {
 
           {/* Render main board */}
           <MainBoard
-              tasks={nonEpicTasks}
+              tasks={tasks.filter((e) => e.epicID === EMPTY_EPIC)}
               states={states}
+              projects={projects}
               boardProps={boardProps}
           />
 
           {/* Render tasks in epics as separate boards */}
           {epics.map((epic) => {
-            const epicTasks = tasks.filter((e) => e.epicID === epic.id);
             return <EpicBoard
                 key={epic.id}
                 epic={epic}
-                epicTasks={epicTasks}
+                epicTasks={tasks.filter((e) => e.epicID === epic.id)}
                 states={states}
+                projects={projects}
                 boardProps={boardProps}
             />;
-          })};
+          })}
         </div>
     );
   }

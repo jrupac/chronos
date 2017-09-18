@@ -16,6 +16,9 @@ class Project {
     this.name = name;
     this.description = description;
     this.active = active;
+
+    // Short display name for project.
+    this.shortName = this.name.substring(0, 3).toUpperCase();
   }
 }
 

@@ -5,7 +5,7 @@ import Task from './task';
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
-const MainBoard = ({tasks, states, boardProps}) => {
+const MainBoard = ({tasks, states, projects, boardProps}) => {
   const {breakpoints, cols, rowHeight} = boardProps;
   const {stateWidth, stateHeight, taskWidth, taskHeight} = boardProps;
 
@@ -48,7 +48,7 @@ const MainBoard = ({tasks, states, boardProps}) => {
                   'y': 0,
                 }}
                 className="board-task-wrapper">
-              <Task task={e}/>
+              <Task task={e} project={projects.get(e.projectID)}/>
             </div>
         ))}
       </ResponsiveReactGridLayout>

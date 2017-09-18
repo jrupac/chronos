@@ -1,11 +1,11 @@
 import React from 'react';
 import {Label} from 'semantic-ui-react';
 
-const Epic = ({epic}) => {
+const Epic = ({epic, project}) => {
   return (
       <div className="board-epic">
         <Label horizontal color='black'>
-          {`E-${epic.id}`}
+          {`${project.shortName}/E${epic.id}`}
         </Label>
         {epic.name}
       </div>

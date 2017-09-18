@@ -2,13 +2,13 @@ import React from 'react';
 import {Card, Label} from 'semantic-ui-react';
 import Dotdotdot from 'react-dotdotdot';
 
-const Task = ({task}) => {
+const Task = ({task, project}) => {
   return (
       <Card fluid raised>
         <Card.Content>
           <Card.Header>
             <Label horizontal color='brown'>
-              {`PRJ-${task.id}`}
+              {`${project.shortName}/T${task.id}`}
             </Label>
             {task.title}
           </Card.Header>

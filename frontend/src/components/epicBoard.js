@@ -6,7 +6,7 @@ import Task from './task';
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 
-const EpicBoard = ({epic, epicTasks, states, boardProps}) => {
+const EpicBoard = ({epic, epicTasks, states, projects, boardProps}) => {
   const {breakpoints, cols, rowHeight} = boardProps;
   const {epicWidth, epicHeight, taskWidth, taskHeight} = boardProps;
 
@@ -31,7 +31,7 @@ const EpicBoard = ({epic, epicTasks, states, boardProps}) => {
               'static': true,
             }}
             className="board-epic-wrapper">
-          <Epic epic={epic}/>
+          <Epic epic={epic} project={projects.get(epic.projectID)}/>
         </div>
 
         {/* Render tasks in this epic */}
@@ -46,7 +46,7 @@ const EpicBoard = ({epic, epicTasks, states, boardProps}) => {
                   'y': 0,
                 }}
                 className="board-task-wrapper">
-              <Task task={e}/>
+              <Task task={e} project={projects.get(e.projectID)}/>
             </div>
         ))}
       </ResponsiveReactGridLayout>
